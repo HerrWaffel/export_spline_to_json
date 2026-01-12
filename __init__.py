@@ -21,7 +21,7 @@ bl_info = {
     "author": "Quint Vrolijk",
     "description": "",
     "blender": (5, 0, 0),
-    "version": (0, 0, 1),
+    "version": (1, 0, 0),
     "location": "File > Import-Export",
     "warning": "",
     "category": "Import-Export",
@@ -134,21 +134,21 @@ class ExportSpline(Operator, ExportHelper):
     filter_glob: StringProperty(default="*.json", options={'HIDDEN'}, maxlen=255,)
 
     world_space: BoolProperty(name="World Space", description="Export positions in world space instead of local space", default=False,)
-    export_animations: BoolProperty(name="Export Animation", description="Include animations in the export", default=False)
-    export_shape_keys: BoolProperty(name="Export Shape Keys", description="Include shape keys in the export", default=False)
-    apply_transform: EnumProperty(
-        items=[
-            ('NONE', "None", "Apply no object transform (Local Space)"),
-            ('APPLY_ALL', "Apply All", "Apply location, rotation, scale. (World Space)"),
-            ('LOCATION', "Location", "Apply location transform"),
-            ('ROTATION', "Rotation", "Apply rotation transform"),
-            ('SCALE', "Scale", "Apply scale transform"),
-            ('ROT_SCALE', "Rotation & Scale", "Apply rotation and scale"),
-        ],
-        name="Apply Transform",
-        default='NONE',
-    )
-    global_scale: FloatProperty(name="Scale", description="Scales the transform by this value",default=1.0)
+    # export_animations: BoolProperty(name="Export Animation", description="Include animations in the export", default=False)
+    # export_shape_keys: BoolProperty(name="Export Shape Keys", description="Include shape keys in the export", default=False)
+    # apply_transform: EnumProperty(
+    #     items=[
+    #         ('NONE', "None", "Apply no object transform (Local Space)"),
+    #         ('APPLY_ALL', "Apply All", "Apply location, rotation, scale. (World Space)"),
+    #         ('LOCATION', "Location", "Apply location transform"),
+    #         ('ROTATION', "Rotation", "Apply rotation transform"),
+    #         ('SCALE', "Scale", "Apply scale transform"),
+    #         ('ROT_SCALE', "Rotation & Scale", "Apply rotation and scale"),
+    #     ],
+    #     name="Apply Transform",
+    #     default='NONE',
+    # )
+    # global_scale: FloatProperty(name="Scale", description="Scales the transform by this value",default=1.0)
 
     @classmethod
     def poll(cls, context):
@@ -160,8 +160,8 @@ class ExportSpline(Operator, ExportHelper):
         layout.use_property_decorate = False  # No animation.
 
         export_panel_main(layout, self)
-        export_panel_animations(layout, self)
-        export_panel_shape_keys(layout, self)
+        # export_panel_animations(layout, self)
+        # export_panel_shape_keys(layout, self)
 
     def execute(self, context):
         self.filepath = bpy.path.ensure_ext(self.filepath, ".json")
@@ -205,8 +205,8 @@ def feat_export_settings(operator:ExportSpline):
     return settings
 
 def export_panel_main(layout:UILayout, operator:ExportSpline):
-    layout.prop(operator, "apply_transform", text="Apply Transform")
-    layout.prop(operator, "global_scale", text="Scale")
+    # layout.prop(operator, "apply_transform", text="Apply Transform")
+    # layout.prop(operator, "global_scale", text="Scale")
     layout.prop(operator, "world_space", text="World Space")
     layout.prop(operator, "axis_forward", text="Forward")
     layout.prop(operator, "axis_up", text="Up")
