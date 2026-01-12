@@ -74,19 +74,19 @@ def prepare_spline_data(temp_objs, settings):
                 "length": spline.calc_length(),
                 "cyclic_u": spline.use_cyclic_u,
                 "cyclic_v": spline.use_cyclic_v,
-                "points": get_point_data(spline, settings),
+                "points": get_point_data(spline),
             }
-            if settings.get("shape_keys"):
-                spline_data["shape_keys"] = get_shape_key_data(temp_obj)
+            # if settings.get("shape_keys"):
+            #     spline_data["shape_keys"] = get_shape_key_data(temp_obj)
                 
-            if settings.get("animations"):
-                spline_data["animations"] = get_animation_data(temp_obj)
+            # if settings.get("animations"):
+            #     spline_data["animations"] = get_animation_data(temp_obj)
             
             splines_data.append(spline_data)
         data.append(splines_data)
     return data
 
-def get_point_data(spline: Spline, settings):
+def get_point_data(spline: Spline):
     """Collects spline point data: tilt, radius, position, (handles*)"""
     points_data = []
     points = spline.points if spline.type != 'BEZIER' else spline.bezier_points
@@ -196,12 +196,12 @@ class ExportSpline(Operator, ExportHelper):
 
 def feat_export_settings(operator:ExportSpline):
     settings = {} 
-    if operator.export_shape_keys:
-        shape_keys_settings = {}
-        settings["shape_keys"] = shape_keys_settings
-    if operator.export_animations:
-        animations_settings = {}
-        settings["animations"] = animations_settings
+    # if operator.export_shape_keys:
+    #     shape_keys_settings = {}
+    #     settings["shape_keys"] = shape_keys_settings
+    # if operator.export_animations:
+    #     animations_settings = {}
+    #     settings["animations"] = animations_settings
     return settings
 
 def export_panel_main(layout:UILayout, operator:ExportSpline):
