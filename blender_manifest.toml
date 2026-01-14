@@ -2,10 +2,10 @@ schema_version = "1.0.0"
 
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
-id = "export_spline_to_json"
+id = "export_curve_to_json"
 version = "1.0.0"
-name = "Export Spline To Json"
-tagline = "File export for splines to JSON"
+name = "Export Curve To Json"
+tagline = "File export for curves to JSON"
 maintainer = "Quint Vrolijk"
 # Supported types: "add-on", "theme"
 type = "add-on"

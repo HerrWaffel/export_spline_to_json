@@ -1,2 +1,2 @@
-# export_spline_to_json
-A simple Blender exporter for splines to JSON.
+# export_curve_to_json
+A simple Blender exporter for curves to JSON.

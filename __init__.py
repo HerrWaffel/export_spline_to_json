@@ -17,7 +17,7 @@ if "bpy" in locals():
     importlib.reload(sys.modules[__name__])
 
 bl_info = {
-    "name": "Export Spline To Json",
+    "name": "Export Curve To Json",
     "author": "Quint Vrolijk",
     "description": "",
     "blender": (5, 0, 0),
@@ -123,10 +123,10 @@ def get_animation_data(obj: Object):
 
 # TO DO: fix scale and rotation for local space, implement apply transform or remove, implement global scale 
 @orientation_helper(axis_forward='-Z', axis_up='Y')
-class ExportSpline(Operator, ExportHelper):
-    """Export spline data to a JSON file"""
-    bl_idname = "export_spline.json"
-    bl_label = "Export Spline"
+class ExportCurve(Operator, ExportHelper):
+    """Export curve data to a JSON file"""
+    bl_idname = "export_curve.json"
+    bl_label = "Export Curve"
     bl_options = {'UNDO', 'PRESET'}
 
     filename_ext = ".json"
@@ -177,12 +177,12 @@ class ExportSpline(Operator, ExportHelper):
 
         data = {
             "export_settings": settings,
-            "splines": prepare_spline_data(temp_objs, feat_export_settings(self) ),
+            "curves": prepare_spline_data(temp_objs, feat_export_settings(self) ),
         }
         with open(self.filepath, 'w') as file:
             json.dump(data, file, indent=2, ensure_ascii=False)
 
-        self.report({'INFO'}, f"Exported spline to {self.filepath}")
+        self.report({'INFO'}, f"Exported curve to {self.filepath}")
 
         for temp_obj in temp_objs:
             bpy.data.objects.remove(temp_obj[1]) 
@@ -194,7 +194,7 @@ class ExportSpline(Operator, ExportHelper):
         return {'RUNNING_MODAL'}
 
 
-def feat_export_settings(operator:ExportSpline):
+def feat_export_settings(operator:ExportCurve):
     settings = {} 
     # if operator.export_shape_keys:
     #     shape_keys_settings = {}
@@ -204,14 +204,14 @@ def feat_export_settings(operator:ExportSpline):
     #     settings["animations"] = animations_settings
     return settings
 
-def export_panel_main(layout:UILayout, operator:ExportSpline):
+def export_panel_main(layout:UILayout, operator:ExportCurve):
     # layout.prop(operator, "apply_transform", text="Apply Transform")
     # layout.prop(operator, "global_scale", text="Scale")
     layout.prop(operator, "world_space", text="World Space")
     layout.prop(operator, "axis_forward", text="Forward")
     layout.prop(operator, "axis_up", text="Up")
 
-def export_panel_animations(layout:UILayout, operator:ExportSpline):
+def export_panel_animations(layout:UILayout, operator:ExportCurve):
     header, body = layout.panel("JSON_export_animations", default_closed=True)
     header.use_property_split = False
     header.prop(operator, "export_animations", text="")
@@ -220,7 +220,7 @@ def export_panel_animations(layout:UILayout, operator:ExportSpline):
         body.enabled = operator.export_animations
         body.label(text="Unused for now")
 
-def export_panel_shape_keys(layout:UILayout, operator:ExportSpline):
+def export_panel_shape_keys(layout:UILayout, operator:ExportCurve):
     header, body = layout.panel("JSON_export_shape_keys", default_closed=True)
     header.use_property_split = False
     header.prop(operator, "export_shape_keys", text="")
@@ -231,11 +231,11 @@ def export_panel_shape_keys(layout:UILayout, operator:ExportSpline):
 
 
 def menu_func(self, context):
-    self.layout.operator(ExportSpline.bl_idname, text="Export Spline (.json)")
+    self.layout.operator(ExportCurve.bl_idname, text="Export Curve (.json)")
 
 
 classes = (
-    ExportSpline,
+    ExportCurve,
 )
 
 def register():
