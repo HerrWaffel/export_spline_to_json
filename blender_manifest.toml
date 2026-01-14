@@ -3,7 +3,11 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "export_curve_to_json"
+<<<<<<< HEAD
 version = "1.0.1"
+=======
+version = "1.0.0"
+>>>>>>> 4a7f93a (Merge pull request #1 from HerrWaffel/v1.0.0)
 name = "Export Curve To Json"
 tagline = "File export for curves to JSON"
 maintainer = "Quint Vrolijk"
@@ -15,7 +19,11 @@ type = "add-on"
 
 # Optional list defined by Blender and server, see:
 # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
+<<<<<<< HEAD
 tags = ["Import-Export"]
+=======
+tags = ["Import-Export", "Development", "Game Engine", "System"]
+>>>>>>> 4a7f93a (Merge pull request #1 from HerrWaffel/v1.0.0)
 
 blender_version_min = "4.2.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.
@@ -58,9 +66,9 @@ license = [
 # Keep this a single short sentence without a period (.) at the end.
 # For longer explanations use the documentation or detail page.
 #
-# [permissions]
+[permissions]
 # network = "Need to sync motion-capture data to server"
-# files = "Import/export FBX from/to disk"
+files = "Export JSON to disk"
 # clipboard = "Copy and paste bone transforms"
 
 # Optional: build settings.
