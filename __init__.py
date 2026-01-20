@@ -197,7 +197,6 @@ class ExportCurve(Operator, ExportHelper):
             "world_space"   : self.world_space,
             "axis_up"       : self.axis_up,
             "axis_forward"  : self.axis_forward,
-            "units"         : context.scene.unit_settings.length_unit
         }
 
         objs = context.selected_objects
