@@ -58,7 +58,7 @@ class ImportCurve(Operator, ImportHelper):
     import_options = [
         ('EMBEDDED', "Embedded", "Use embedded data for importing"),
         ('OVERWRITE', "Overwrite", "Include data with custom settings"),
-        ('EXCLUDE', "Exclude", ""),
+        ('EXCLUDE', "Exclude", "Use default import settings"),
     ]
     
     filename_ext = ".json"
@@ -66,9 +66,9 @@ class ImportCurve(Operator, ImportHelper):
     directory: StringProperty( subtype='DIR_PATH', options={'HIDDEN', 'SKIP_PRESET'},)
     files: CollectionProperty( name="File Path", type=OperatorFileListElement, options={'HIDDEN', 'SKIP_PRESET'},)
     
-    orientation_settings: EnumProperty( items=import_options, default='EMBEDDED', name="Orientation", description="Overwrite embedded export settings for axes and units")
-    animations_settings : EnumProperty( items=import_options, default='EMBEDDED', name="Animations", description="Import curve animations")
-    shape_keys_settings : EnumProperty( items=import_options, default='EMBEDDED', name="Shape Keys", description="Import curve shape keys")
+    orientation_settings: EnumProperty( items=import_options, default='EMBEDDED', name="Orientation", description="Import settings for curve orientation, 'EXCLUDE' mode uses default import settings")
+    animations_settings : EnumProperty( items=import_options, default='EXCLUDE', name="Animations", description="Import curve animations")
+    shape_keys_settings : EnumProperty( items=import_options, default='EXCLUDE', name="Shape Keys", description="Import curve shape keys")
     
     global_scale: FloatProperty(name="Scale", default=1.0, description="Scale all positions and radia")
     apply_transform: EnumProperty(
