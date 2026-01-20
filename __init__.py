@@ -94,8 +94,8 @@ class ImportCurve(Operator, ImportHelper):
 
         import_panel_main(self, layout)
         import_panel_orientation(self, layout)
-        import_panel_animations(self, layout)
-        import_panel_shape_keys(self, layout)
+        # import_panel_animations(self, layout)
+        # import_panel_shape_keys(self, layout)
     
     def execute(self, context):
         keywords = self.as_keywords(ignore=("filter_glob", "directory", "filepath", "files", "filename_ext"))
@@ -121,7 +121,7 @@ def import_panel_main(operator:ImportCurve, layout:UILayout):
     layout.prop(operator, "global_scale", text="Scale")
 
 def import_panel_orientation(operator:ImportCurve, layout:UILayout):
-    header, body = layout.panel("JSON_import_orientation", default_closed=True)
+    header, body = layout.panel("JSON_import_orientation", default_closed=False)
     header.use_property_split = False
     header.label(text="Orientation")
     header.prop(operator, "orientation_settings", text="")
