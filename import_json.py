@@ -50,23 +50,19 @@ def import_curves_from_json(operator, context, filename, filepath,
 
     imported_objects = []
     for splines_list in curves_data:
+        prev_name = ""
         for spline_data in splines_list:
-            curve_obj = create_curve_object(
-                context,
-                spline_data,
-                invert_convert_matrix,
-                global_scale,
-            )
+            if spline_data.get("name") != prev_name:
+                curve_obj, prev_name = create_new_object(context, spline_data)
+            
+            curve_obj = set_curve_data(curve_obj, spline_data, invert_convert_matrix, global_scale)
             curve_obj.scale = Vector.Fill(3, scale_factor)
             imported_objects.append(curve_obj)
     
     return {'FINISHED'}
 
-
-def create_curve_object(context:bpy.types.Context, spline_data, invert_convert_matrix, scale):
-    """Create a single curve object from spline data"""
+def create_new_object(context:bpy.types.Context, spline_data):
     curve_name = spline_data.get("name", "Untitled")
-    spline_type = spline_data.get("type", "POLY")
 
     # Create a new curve data block
     curve_data = bpy.data.curves.new(name=curve_name, type="CURVE")
@@ -75,8 +71,15 @@ def create_curve_object(context:bpy.types.Context, spline_data, invert_convert_m
     # Create curve object
     curve_obj = bpy.data.objects.new(curve_name, curve_data)
     context.collection.objects.link(curve_obj)
+
+    return curve_obj, curve_name
+
+def set_curve_data(curve_obj, spline_data, invert_convert_matrix, scale):
+    """Create a single curve object from spline data"""
+    curve_data = curve_obj.data
     
-    # Create spline
+    # Set spline data
+    spline_type = spline_data.get("type", "POLY")
     spline = curve_data.splines.new(type=spline_type)
     spline.use_cyclic_u = spline_data.get("cyclic_u", False)
     spline.use_cyclic_v = spline_data.get("cyclic_v", False)
