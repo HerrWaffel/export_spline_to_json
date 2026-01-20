@@ -1,3 +1,4 @@
+from mathutils import Matrix,Vector
 from bpy.types import (
     Object,
     Spline,
@@ -7,7 +8,10 @@ from bpy_extras.io_utils import (
 )
 
 
-def prepare_export_objects(objs, settings):
+def get_export_settings(axis_up=None, axis_forward=None, world_space=None):
+    return {k: v for k, v in locals().items() if v is not None}
+
+def prepare_export_objects(objs, settings, scale_factor=1.0):
     """Creates a copy of each object and converts transform according to settings"""
     temp_objs = []
     for obj in objs:
@@ -15,6 +19,8 @@ def prepare_export_objects(objs, settings):
         temp_obj.data = obj.data.copy()
 
         conversion_matrix  = axis_conversion( to_forward=settings["axis_forward"], to_up=settings["axis_up"] ).to_4x4()
+        conversion_matrix = conversion_matrix @ Matrix.Scale(scale_factor, 4)
+
         temp_obj_matrix = temp_obj.matrix_world if settings["world_space"] else temp_obj.matrix_parent_inverse * temp_obj.matrix_basis
         temp_obj.data.transform( conversion_matrix @ temp_obj_matrix )
         
@@ -79,3 +85,28 @@ def get_shape_key_data(obj: Object):
 def get_animation_data(obj: Object):
     animation_data = []
     return animation_data
+
+def export_curve_data(operator, context, filename, filepath,
+                      world_space=False,
+                      axis_forward='-Z',
+                      axis_up='Y',
+                      global_scale=1.0,
+                      ):
+    import json
+    import bpy
+
+    objs = context.selected_objects
+    settings = get_export_settings(axis_up, axis_forward, world_space)
+    temp_objs = prepare_export_objects(objs, settings, global_scale)
+
+    data = {
+        "export_settings": settings,
+        "curves": prepare_spline_data(temp_objs, settings),
+    }
+    with open(filepath, 'w') as file:
+        json.dump(data, file, indent=2, ensure_ascii=False)
+
+    operator.report({'INFO'}, f"Exported curve to {filepath}")
+
+    for temp_obj in temp_objs:
+        bpy.data.objects.remove(temp_obj[1]) 

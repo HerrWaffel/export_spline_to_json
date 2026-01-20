@@ -28,7 +28,6 @@ bl_info = {
 }
 
 import bpy
-import json
 from bpy.props import (
     BoolProperty,
     CollectionProperty,
@@ -174,7 +173,7 @@ class ExportCurve(Operator, ExportHelper):
     #     name="Apply Transform",
     #     default='NONE',
     # )
-    # global_scale: FloatProperty(name="Scale", description="Scales the transform by this value",default=1.0)
+    global_scale: FloatProperty(name="Scale", description="Scales the transform by this value",default=1.0)
 
     @classmethod
     def poll(cls, context):
@@ -190,29 +189,12 @@ class ExportCurve(Operator, ExportHelper):
         # export_panel_shape_keys(layout, self)
 
     def execute(self, context):
+        keywords = self.as_keywords(ignore=("check_existing", "filter_glob", "filepath", "filename_ext"))
         from . import export_json
 
         self.filepath = bpy.path.ensure_ext(self.filepath, ".json")
-        settings = {
-            "world_space"   : self.world_space,
-            "axis_up"       : self.axis_up,
-            "axis_forward"  : self.axis_forward,
-        }
-
-        objs = context.selected_objects
-        temp_objs = export_json.prepare_export_objects(objs, settings)
-
-        data = {
-            "export_settings": settings,
-            "curves": export_json.prepare_spline_data(temp_objs, feat_export_settings(self) ),
-        }
-        with open(self.filepath, 'w') as file:
-            json.dump(data, file, indent=2, ensure_ascii=False)
-
-        self.report({'INFO'}, f"Exported curve to {self.filepath}")
-
-        for temp_obj in temp_objs:
-            bpy.data.objects.remove(temp_obj[1]) 
+        print(keywords)
+        export_json.export_curve_data(self, context, self.filename, self.filepath, **keywords)
 
         return {'FINISHED'}
 
@@ -221,19 +203,9 @@ class ExportCurve(Operator, ExportHelper):
         return {'RUNNING_MODAL'}
 
 
-def feat_export_settings(operator:ExportCurve):
-    settings = {} 
-    # if operator.export_shape_keys:
-    #     shape_keys_settings = {}
-    #     settings["shape_keys"] = shape_keys_settings
-    # if operator.export_animations:
-    #     animations_settings = {}
-    #     settings["animations"] = animations_settings
-    return settings
-
 def export_panel_main(layout:UILayout, operator:ExportCurve):
     # layout.prop(operator, "apply_transform", text="Apply Transform")
-    # layout.prop(operator, "global_scale", text="Scale")
+    layout.prop(operator, "global_scale", text="Scale")
     layout.prop(operator, "world_space", text="World Space")
     layout.prop(operator, "axis_forward", text="Forward")
     layout.prop(operator, "axis_up", text="Up")
