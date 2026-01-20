@@ -31,19 +31,120 @@ import bpy
 import json
 from bpy.props import (
     BoolProperty,
+    CollectionProperty,
     EnumProperty,
     FloatProperty,
     StringProperty,
 )
 from bpy.types import (
     Operator,
+    OperatorFileListElement,
     UILayout,
 )
 from bpy_extras.io_utils import (
+    ImportHelper,
     ExportHelper, 
     orientation_helper, 
 )
 
+
+@orientation_helper(axis_forward='-Z', axis_up='Y')
+class ImportCurve(Operator, ImportHelper):
+    """Import curve data using JSON"""
+    bl_idname = "import_curve.json"
+    bl_label = "Import Curve"
+    bl_options = {'UNDO','PRESET'}
+
+    import_options = [
+        ('EMBEDDED', "Embedded", "Use embedded data for importing"),
+        ('OVERWRITE', "Overwrite", "Include data with custom settings"),
+        ('EXCLUDE', "Exclude", ""),
+    ]
+    
+    filename_ext = ".json"
+    filter_glob: StringProperty( default="*.json", options={'HIDDEN'}, maxlen=255,)
+    directory: StringProperty( subtype='DIR_PATH', options={'HIDDEN', 'SKIP_PRESET'},)
+    files: CollectionProperty( name="File Path", type=OperatorFileListElement, options={'HIDDEN', 'SKIP_PRESET'},)
+    
+    orientation_settings: EnumProperty( items=import_options, default='EMBEDDED', name="Orientation", description="Overwrite embedded export settings for axes and units")
+    animations_settings : EnumProperty( items=import_options, default='EMBEDDED', name="Animations", description="Import curve animations")
+    shape_keys_settings : EnumProperty( items=import_options, default='EMBEDDED', name="Shape Keys", description="Import curve shape keys")
+    
+    global_scale: FloatProperty(name="Scale", default=1.0, description="Scale all positions and radia")
+    apply_transform: EnumProperty(
+        items=[
+            ('NONE', "None", "Apply no object transform (Local Space)"),
+            ('APPLY_ALL', "Apply All", "Apply location, rotation, scale. (World Space)"),
+            ('LOCATION', "Location", "Apply location transform"),
+            ('SCALE', "Scale", "Apply scale transform"),
+        ],
+        name="Apply Transform",
+        default='NONE',
+    )
+
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene is not None
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        import_panel_main(self, layout)
+        import_panel_orientation(self, layout)
+        import_panel_animations(self, layout)
+        import_panel_shape_keys(self, layout)
+    
+    def execute(self, context):
+        keywords = self.as_keywords(ignore=("filter_glob", "directory", "filepath", "files", "filename_ext"))
+        from . import import_json
+        import os
+
+        if self.files:
+            ret = {'CANCELLED'}
+            for file in self.files:
+                path = os.path.join(self.directory, file.name)
+                if import_json.import_curves_from_json(self, context, filename=file.name, filepath=path, **keywords) == {'FINISHED'}:
+                    ret = {'FINISHED'}
+            return ret
+        else:
+            return import_json.import_curves_from_json(self, context, self.filename, self.filepath, **keywords)
+        
+    def invoke(self, context, event):
+        return self.invoke_popup(context)
+
+
+def import_panel_main(operator:ImportCurve, layout:UILayout):
+    layout.prop(operator, "apply_transform", text="Apply Transform")
+    layout.prop(operator, "global_scale", text="Scale")
+
+def import_panel_orientation(operator:ImportCurve, layout:UILayout):
+    header, body = layout.panel("JSON_import_orientation", default_closed=True)
+    header.use_property_split = False
+    header.label(text="Orientation")
+    header.prop(operator, "orientation_settings", text="")
+    if body:
+        body.enabled = operator.orientation_settings == 'OVERWRITE'
+        body.prop(operator, "axis_forward", text="Forward")
+        body.prop(operator, "axis_up", text="Up")
+
+def import_panel_animations(operator:ImportCurve, layout:UILayout):
+    header, body = layout.panel("JSON_import_animations", default_closed=True)
+    header.use_property_split = False
+    header.label(text="Animations")
+    header.prop(operator, "animations_settings", text="")
+    if body:
+        body.enabled = (operator.animations_settings == 'OVERWRITE')
+
+def import_panel_shape_keys(operator:ImportCurve, layout:UILayout):
+    header, body = layout.panel("JSON_import_shape_keys", default_closed=True)
+    header.use_property_split = False
+    header.label(text="Shape Keys")
+    header.prop(operator, "shape_keys_settings", text="")
+    if body:
+        body.enabled = operator.shape_keys_settings == 'OVERWRITE'
 
 
 # TO DO: fix scale and rotation for local space, implement apply transform or remove, implement global scale 
@@ -161,18 +262,27 @@ def menu_func_export(self, context):
     self.layout.operator(ExportCurve.bl_idname, text="Export Curve (.json)")
 
 
+def menu_func_import(self, context):
+    self.layout.operator(ImportCurve.bl_idname, text="Import Curve (.json)")
+
+
 classes = (
+    ImportCurve,
     ExportCurve,
 )
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
 
 def unregister():
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+    
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
